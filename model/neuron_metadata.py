@@ -35,6 +35,13 @@ class NeuronMetadataCollection:
   def get_size(self):
     return len(self.id_to_metadata)
 
+  def get_neuron_ids_by_neuron_type(self, neuron_type):
+    ids = []
+    for (id, metadata) in self.id_to_metadata.items():
+      if metadata.neuron_type == neuron_type:
+        ids.append(id)
+    return ids
+
   @staticmethod
   def json_group_to_neuron_type(group):
     if group == 1:

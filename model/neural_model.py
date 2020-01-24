@@ -29,7 +29,9 @@ class NeuralModel:
     # Number of neurons
     self.N = neuron_metadata_collection.get_size()
 
-    self.init_conds = 10**(-4)*np.random.normal(0, 0.94, 2*N)
+    self.init_conds = 10**(-4)*np.random.normal(0, 0.94, 2*self.N)
+
+    self.dt = 0.01
 
     self.I_ext = np.zeros(self.N)
 
@@ -158,8 +160,7 @@ class NeuralModel:
     """
 
     N = self.N
-    # Each timestep is 0.01s long.
-    dt = 0.01
+    dt = self.dt
 
     # The variables to store our complete timeseries data.
     v_mat = []
