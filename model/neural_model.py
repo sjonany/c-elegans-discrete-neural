@@ -13,9 +13,6 @@ class NeuralModel:
 
     # You can tweak parameters before running
 
-    # If you want a fixed-seed run.
-    # If not specified, will not set seed, and use default python randomizer
-    model.seed = 0
     model.set_current_injection("AVBL", 2.3)
     model.set_current_injection("AVBR", 2.3)
     model.set_current_injection("PLML", 1.4)
@@ -30,10 +27,9 @@ class NeuralModel:
   def __init__(self, neuron_metadata_collection, C=0.015, Gc=0.1, ggap=1.0, gsyn=1.0):
     self.neuron_metadata_collection = neuron_metadata_collection
     # Number of neurons
-    self.N = 279
+    self.N = neuron_metadata_collection.get_size()
 
-    # If seed is not specified, then the initial conditions will use python's default random seed.
-    self.seed = None
+    self.init_conds = 10**(-4)*np.random.normal(0, 0.94, 2*N)
 
     self.I_ext = np.zeros(self.N)
 
@@ -79,9 +75,6 @@ class NeuralModel:
     # N-element array that is 1.0 if inhibitory.
     is_inhibitory = np.load(get_data_file_abs_path('emask.npy'))
     self.E = np.reshape(-48.0 * is_inhibitory, self.N)
-
-    if self.seed is not None:
-      np.random.seed(self.seed)
 
     self.compute_Vth()
 
@@ -167,8 +160,6 @@ class NeuralModel:
     N = self.N
     # Each timestep is 0.01s long.
     dt = 0.01
-    # Note that seed is set in init()
-    init_vals = 10**(-4)*np.random.normal(0, 0.94, 2*N)
 
     # The variables to store our complete timeseries data.
     v_mat = []
@@ -176,7 +167,7 @@ class NeuralModel:
     v_normalized_mat = []
 
     dyn = integrate.ode(self.dynamic).set_integrator('vode', atol = 1e-3, min_step = dt*1e-6, method = 'bdf', with_jacobian = True)
-    dyn.set_initial_value(init_vals, 0)
+    dyn.set_initial_value(self.init_conds, 0)
 
     for t in range(num_timesteps):
       dyn.integrate(dyn.t + dt)
