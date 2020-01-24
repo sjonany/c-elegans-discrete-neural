@@ -1,3 +1,6 @@
+# Script results that you don't want to be stored in git
+local_results/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
