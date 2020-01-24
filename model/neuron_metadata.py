@@ -1,4 +1,5 @@
 from enum import Enum
+from itertools import chain
 import json
 
 class NeuronType(Enum):
@@ -41,6 +42,18 @@ class NeuronMetadataCollection:
       if metadata.neuron_type == neuron_type:
         ids.append(id)
     return ids
+
+  """
+  Usage:
+    create_lr_names_from_base(["PLM", "ALM"])
+  Output:
+    ["PLML", "PLMR", "ALML", "ALMR"]
+  """
+  @staticmethod
+  def create_lr_names_from_base(base_names):
+    return list(chain.from_iterable(
+      (base_name + "L", base_name + "R")
+      for base_name in base_names))
 
   @staticmethod
   def json_group_to_neuron_type(group):

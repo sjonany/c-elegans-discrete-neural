@@ -167,7 +167,9 @@ class NeuralModel:
     s_mat = []
     v_normalized_mat = []
 
-    dyn = integrate.ode(self.dynamic).set_integrator('vode', atol = 1e-3, min_step = dt*1e-6, method = 'bdf', with_jacobian = True)
+    dyn = integrate.ode(self.dynamic).set_integrator('vode', atol = 1e-3,
+        min_step = dt*1e-6, method = 'bdf', with_jacobian = True,
+        max_step = dt)
     dyn.set_initial_value(self.init_conds, 0)
 
     for t in range(num_timesteps):
