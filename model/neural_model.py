@@ -93,7 +93,6 @@ class NeuralModel:
     """
     self.ggap = 1.0
     self.gsyn = 1.0
-    self.B = 0.25
     self.Gc = 0.1
     self.Ec = -35.0
     self.C = 0.01
