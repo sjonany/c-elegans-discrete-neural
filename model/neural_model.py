@@ -64,6 +64,9 @@ class NeuralModel:
     self.I_ext[neuron_id] = current_nA * 10000
   
   def init(self):
+    """
+    Initialize parameters according to Kim et al., 2019.
+    """
     # Gap junctions. Total conductivity of gap junctions, where total conductivity = #junctions * ggap.
     # An N x N matrix were Gg[i][j] = from neuron j to i.
     self.Gg = np.load(get_data_file_abs_path('Gg.npy')) * self.ggap
@@ -79,6 +82,28 @@ class NeuralModel:
     self.E = np.reshape(-48.0 * is_inhibitory, self.N)
 
     self.compute_Vth()
+
+  def init_kunert_2017(self):
+    """
+    Change parameters to Kunert et al., 2017: "Multistability ..."
+    See section 2.2 model parameters.
+    The parameters are slightly different from Kimin et al., 2019
+    See init() for more documentation.
+    Remember that pS to arb (unit used by the model), you divide by 100.
+    """
+    self.ggap = 1.0
+    self.gsyn = 1.0
+    self.B = 0.25
+    self.Gc = 0.1
+    self.Ec = -35.0
+    self.C = 0.01
+    self.Gg = np.load(get_data_file_abs_path('Gg.npy')) * self.ggap
+    self.Gs = np.load(get_data_file_abs_path('Gs.npy')) * self.gsyn
+    is_inhibitory = np.load(get_data_file_abs_path('emask.npy'))
+    self.E = np.reshape(-45.0 * is_inhibitory, self.N)
+
+    self.compute_Vth()
+
 
   def compute_Vth(self):
     """
