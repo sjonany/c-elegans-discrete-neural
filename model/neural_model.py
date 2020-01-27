@@ -99,6 +99,11 @@ class NeuralModel:
     self.C = 0.01
     self.Gg = np.load(get_data_file_abs_path('Gg.npy')) * self.ggap
     self.Gs = np.load(get_data_file_abs_path('Gs.npy')) * self.gsyn
+
+    # ar and ad are given in Kunert et al., 2014, which strangely enough has different
+    # values for the previous params, and more in line with Kim et al., 2019's.
+    self.ar = 1.0 
+    self.ad = 5.0
     is_inhibitory = np.load(get_data_file_abs_path('emask.npy'))
     self.E = np.reshape(-45.0 * is_inhibitory, self.N)
 
