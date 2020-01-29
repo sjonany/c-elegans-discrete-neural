@@ -146,8 +146,7 @@ def gen_images_one_simulation(case_subdir_path, file_prefix):
   # np.random.seed(0)
   model.init_conds = 10**(-4)*np.random.normal(0, 0.94, 2*N)
 
-  for (neuron, current) in case.items():
-    model.set_current_injection(neuron, current)
+  model.set_I_ext_constant_currents(case)
   model.init()
   (v_mat, s_mat, v_normalized_mat) = model.run(simul_time)
 

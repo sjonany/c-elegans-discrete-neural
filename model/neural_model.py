@@ -13,11 +13,11 @@ class NeuralModel:
     model = NeuralModel(neuron_metadata_collection)
 
     # You can tweak parameters before running
-
-    model.set_current_injection("AVBL", 2.3)
-    model.set_current_injection("AVBR", 2.3)
-    model.set_current_injection("PLML", 1.4)
-    model.set_current_injection("PLMR", 1.4)
+    stimulus = {
+      "PLML": 1.4,
+      "PLMR": 1.4,
+    }
+    model.set_I_ext_constant_currents(stimulus)
 
     # This will use your tweaked parameters to read files and precompute some values.
     model.init()
@@ -39,8 +39,8 @@ class NeuralModel:
 
     # An array of time values where I_ext_t changes, and so need to be re-invoked
     # These are actual t values in the dynamical system, and so can be non-integers
-    # Performance optimization because I tried calling a function everytime in the dynamical system
-    # and it's just too slow.
+    # Performance optimization. 15% speedup. See
+    # https://github.com/sjonany/c-elegans-discrete-neural/commit/cfdfbab3464946872b5fc6e17e04a4885cca7550
     self.t_changes_I_ext = [0]
 
     # The current I_i vector at a specific time
