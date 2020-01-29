@@ -39,7 +39,7 @@ class NeuralModel:
     # These are actual t values in the dynamical system, and so can be non-integers
     # Performance optimization because I tried calling a function everytime in the dynamical system
     # and it's just too slow.
-    self.t_changes_I_ext = []
+    self.t_changes_I_ext = [0]
 
     # The current I_i vector at a specific time
     self.cur_I_ext = None
