@@ -33,7 +33,16 @@ class NeuralModel:
 
     self.dt = 0.01
 
-    self.I_ext = np.zeros(self.N)
+    # I_i(t), where i is a neuron index
+    self.I_ext_t = lambda t: np.zeros(self.N)
+    # An array of time values where I_ext_t changes, and so need to be re-invoked
+    # These are actual t values in the dynamical system, and so can be non-integers
+    # Performance optimization because I tried calling a function everytime in the dynamical system
+    # and it's just too slow.
+    self.t_changes_I_ext = []
+
+    # The current I_i vector at a specific time
+    self.cur_I_ext = None
 
     # Cell membrane capacitance. Default: 1.5 pF / 100 = 0.015 arb (arbitrary unit)
     self.C = C
@@ -58,11 +67,39 @@ class NeuralModel:
     # Width of the sigmoid (mv^-1)
     self.B = 0.125
 
-  def set_current_injection(self, neuron_name, current_nA):
-    neuron_id = self.neuron_metadata_collection.get_id_from_name(neuron_name)
-    # For reference, 2.3nA results in 23,000 current in interactome's code
-    self.I_ext[neuron_id] = current_nA * 10000
-  
+  def set_I_ext(self, time_to_I_ext_fun, t_changes_I_ext):
+    """
+    Set the injected currents, which can vary over time.
+    time_to_I_ext_fun specs:
+        Input: t
+        Output: A vector of scalars I_ext_i, one for each neuron.
+            The scalars should be in nA.
+            The neuron ids are based off neuron_metadata_collection.
+    t_changes_I_ext:
+        An array of time values where I_ext(t) changes, and needs to be re-invoked.
+    """
+    # Need to rescale from nA to arbs
+    self.I_ext_t = lambda t: NeuralModel.nA_to_arbs(np.array(time_to_I_ext_fun(t)))
+    self.t_changes_I_ext = t_changes_I_ext
+
+  def set_I_ext_constant_currents(self, neuron_name_to_current_nA):
+    """
+    Helper function on top of set_I_ext if you just want constant currents.
+    Unlike set_I_ext_arbs, the current units are in nA.
+    neuron_name_to_current_nA: A dictionary
+        key: string like "AWAL"
+        value: constant injected current like 2.3 nA
+    """
+    neuron_id_to_current_nA = [0.0] * self.N
+    for neuron, current_nA in neuron_name_to_current_nA.items():
+        neuron_id = self.neuron_metadata_collection.get_id_from_name(neuron)
+        neuron_id_to_current_nA[neuron_id] = NeuralModel.nA_to_arbs(current_nA)
+    self.set_I_ext(lambda t: neuron_id_to_current_nA, [0])
+
+  @staticmethod
+  def nA_to_arbs(nA):
+    return nA * 10000
+
   def init(self):
     """
     Initialize parameters according to Kim et al., 2019.
@@ -80,8 +117,6 @@ class NeuralModel:
     # N-element array that is 1.0 if inhibitory.
     is_inhibitory = np.load(get_data_file_abs_path('emask.npy'))
     self.E = np.reshape(-48.0 * is_inhibitory, self.N)
-
-    self.compute_Vth()
 
   def init_kunert_2017(self):
     """
@@ -105,8 +140,6 @@ class NeuralModel:
     self.ad = 5.0
     is_inhibitory = np.load(get_data_file_abs_path('emask.npy'))
     self.E = np.reshape(-45.0 * is_inhibitory, self.N)
-
-    self.compute_Vth()
 
 
   def compute_Vth(self):
@@ -137,12 +170,20 @@ class NeuralModel:
     m4 = self.Gg
 
     A = m1 + m2 + m3 + m4
-    b = b1 + b3 - self.I_ext
+    b = b1 + b3 - self.cur_I_ext
     self.Vth = np.reshape(linalg.solve(A, b), self.N)
   
   def dynamic(self, t, state_vars):
     """Dictates the dynamics of the system.
     """
+    if len(self.t_changes_I_ext) > 0 and t >= self.t_changes_I_ext[0]:
+        self.cur_I_ext = self.I_ext_t(t)
+        # Get the next change time
+        self.t_changes_I_ext.pop(0)
+        # Vth depends on I_ext.
+        # If have time, make this computation more efficient like Kim et al., 2019's code.
+        self.compute_Vth()
+
     v_arr, s_arr = np.split(state_vars, 2)
 
     # I_leak
@@ -158,7 +199,7 @@ class NeuralModel:
     # Second term is matrix mult of G and (point mult of s_j and E_j)
     I_syn = v_arr * (self.Gs @ s_arr) - self.Gs @ (s_arr * self.E)
 
-    dV = (-I_leak - I_gap - I_syn + self.I_ext) / self.C
+    dV = (-I_leak - I_gap - I_syn + self.cur_I_ext) / self.C
     phi = np.reciprocal(1.0 + np.exp(-self.B*(v_arr - self.Vth)))
     syn_rise = self.ar * phi * (1 - s_arr)
                           
@@ -202,6 +243,8 @@ class NeuralModel:
     dyn.set_initial_value(self.init_conds, 0)
 
     for t in range(num_timesteps):
+      if t % 100 == 0:
+        print("Timestep %d out of %d" % (t, num_timesteps))
       dyn.integrate(dyn.t + dt)
       v_arr = dyn.y[:N]
       s_arr = dyn.y[N:]
