@@ -1,6 +1,7 @@
 import numpy as np
 from scipy import integrate, linalg, sparse
 import pdb
+import time
 from .neuron_metadata import *
 from .data_accessor import *
 
@@ -243,6 +244,7 @@ class NeuralModel:
         max_step = dt)
     dyn.set_initial_value(self.init_conds, 0)
 
+    start_time = time.time()
     for t in range(num_timesteps):
       if t % 100 == 0:
         print("Timestep %d out of %d" % (t, num_timesteps))
@@ -253,5 +255,5 @@ class NeuralModel:
       v_mat.append(v_arr)
       s_mat.append(s_arr)
       v_normalized_mat.append(v_normalized_arr)
-
+    print("Total runtime = %.2fs" % (time.time() - start_time))
     return np.array(v_mat), np.array(s_mat), np.array(v_normalized_mat)
