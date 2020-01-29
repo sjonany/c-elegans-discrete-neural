@@ -35,6 +35,7 @@ class NeuralModel:
 
     # I_i(t), where i is a neuron index
     self.I_ext_t = lambda t: np.zeros(self.N)
+
     # An array of time values where I_ext_t changes, and so need to be re-invoked
     # These are actual t values in the dynamical system, and so can be non-integers
     # Performance optimization because I tried calling a function everytime in the dynamical system
@@ -93,7 +94,7 @@ class NeuralModel:
     neuron_id_to_current_nA = [0.0] * self.N
     for neuron, current_nA in neuron_name_to_current_nA.items():
         neuron_id = self.neuron_metadata_collection.get_id_from_name(neuron)
-        neuron_id_to_current_nA[neuron_id] = NeuralModel.nA_to_arbs(current_nA)
+        neuron_id_to_current_nA[neuron_id] = current_nA
     self.set_I_ext(lambda t: neuron_id_to_current_nA, [0])
 
   @staticmethod
