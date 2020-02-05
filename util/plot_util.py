@@ -5,8 +5,8 @@ import pylab as plt
 import numpy as np
 from sklearn.decomposition import PCA
 from model.neuron_metadata import *
-# from .numpy_util import *
 from . import numpy_util as np_util
+import pdb
 
 def plot_potentials(neuron_names_to_show, dynamics, is_normalized_v, dt, neuron_metadata_collection):
   """ Plot timeseries charts for the selected neuron names using data from 'dynamics'

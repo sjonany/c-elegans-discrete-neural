@@ -172,6 +172,8 @@ class NeuralModel:
     m4 = self.Gg
 
     A = m1 + m2 + m3 + m4
+    # TODO: Create a mode where you don't use moving Vth.
+    # b = b1 + b3
     b = b1 + b3 - self.cur_I_ext
     self.Vth = np.reshape(linalg.solve(A, b), self.N)
   
