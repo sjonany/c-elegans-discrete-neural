@@ -175,6 +175,7 @@ class NeuralModel:
     # TODO: Create a mode where you don't use moving Vth.
     # b = b1 + b3
     b = b1 + b3 - self.cur_I_ext
+    self.A = A
     self.Vth = np.reshape(linalg.solve(A, b), self.N)
   
   def dynamic(self, t, state_vars):
