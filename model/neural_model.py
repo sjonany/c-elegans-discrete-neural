@@ -178,10 +178,8 @@ class NeuralModel:
     self.A = A
     self.Vth = np.reshape(linalg.solve(A, b), self.N)
   
-  def dynamic(self, t, state_vars):
-    """Dictates the dynamics of the system.
-    """
-    v_arr, s_arr = np.split(state_vars, 2)
+
+  def update_cur_I_ext_and_Vth(self, t):
     if len(self.t_changes_I_ext) > 0 and t >= self.t_changes_I_ext[0]:
         self.cur_I_ext = self.I_ext_t(t)
         # Get the next change time
@@ -189,6 +187,13 @@ class NeuralModel:
         # Vth depends on I_ext.
         # If have time, make this computation more efficient like Kim et al., 2019's code.
         self.compute_Vth()
+
+
+  def dynamic(self, t, state_vars):
+    """Dictates the dynamics of the system.
+    """
+    v_arr, s_arr = np.split(state_vars, 2)
+    self.update_cur_I_ext_and_Vth(t)
 
     # I_leak
     I_leak = self.Gc * (v_arr - self.Ec)
