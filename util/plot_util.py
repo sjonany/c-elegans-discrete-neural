@@ -8,13 +8,16 @@ from model.neuron_metadata import *
 from . import numpy_util as np_util
 import pdb
 
-def plot_potentials(neuron_names_to_show, dynamics, is_normalized_v, dt, neuron_metadata_collection):
+def plot_potentials(neuron_names_to_show, dynamics, is_normalized_v, dt, neuron_metadata_collection, fig_axes):
   """ Plot timeseries charts for the selected neuron names using data from 'dynamics'
   Usage:
     from util.neuron_metadata import *
     neuron_metadata_collection = NeuronMetadataCollection.load_from_chem_json('data/chem.json')
     dynamics = np.load('data/dynamics_fwd_5s.npy')
-    plot_saved_dynamics(['PLML', 'PLMR', 'VB01'], dynamics, neuron_metadata_collection)
+
+    fig, axes = plt.subplots(nrows=num_neurons_to_show, ncols=1,
+        figsize=(10, 5 * num_neurons_to_show))
+    plot_saved_dynamics(['PLML', 'PLMR', 'VB01'], dynamics, neuron_metadata_collection, axes)
   Param
     is_normalized_v (bool)
       Set to true if you are plotting the Vth-adjusted traces, instead of the normal V(t).
@@ -22,8 +25,6 @@ def plot_potentials(neuron_names_to_show, dynamics, is_normalized_v, dt, neuron_
   """
   dynamics_snapshot_count = dynamics.shape[0]
   num_neurons_to_show = len(neuron_names_to_show)
-  fig, axes = plt.subplots(nrows=num_neurons_to_show, ncols=1,
-      figsize=(10, 5 * num_neurons_to_show))
   times = np.arange(0, dynamics_snapshot_count * dt, dt)
   for i in range(num_neurons_to_show):
     name = neuron_names_to_show[i]
@@ -31,15 +32,11 @@ def plot_potentials(neuron_names_to_show, dynamics, is_normalized_v, dt, neuron_
     # The neuron ids are already 0-indexed, and is a direct index to dynamics column.
     dynamic = dynamics[:, id]
     
-    if num_neurons_to_show == 1:
-      ax = axes
-    else:
-      ax = axes[i]
+    ax = fig_axes[i]
     ax.plot(times, dynamic)
     ax.set_ylabel(get_v_y_axis_label(is_normalized_v))
     ax.set_xlabel("Time (s)")
     ax.set_title(name)
-  return fig
 
 def plot_pcas(dynamics, dt, neuron_metadata_collection):
   """Plot timeseries of PCAs for each of the 3 neuron classes [sensory, motor, interneuron]
@@ -68,11 +65,12 @@ def create_changing_step_bifurcation_plot(
     peak_amp_nA,
     amp_delta_nA, 
     step_duration_timesteps,
-    neuron_metadata_collection):
+    neuron_metadata_collection,
+    fig_axes):
   """
-  See changing_step_awa notebook for usage
+  See changing_step_awa notebook for usage.
+  fig_axes is a map from neuron name to a list of 4 axes to draw on.
   """
-
   # From neuron name to a list of summary statistics of one step of one neuron.
   # Each array element is (prev_I, now_I, minV, maxV, meanV)
   step_results_per_neuron = {}
@@ -137,46 +135,50 @@ def create_changing_step_bifurcation_plot(
     maxVs_per_neuron_asc[neuron]
     meanVs_per_neuron_asc[neuron]
     
-    fig, ax = plt.subplots(nrows=1, ncols=1)
-    ax.plot(current_Nas, minVs_per_neuron_asc[neuron], label="min")
-    ax.plot(current_Nas, maxVs_per_neuron_asc[neuron], label="max")
-    ax.plot(current_Nas, meanVs_per_neuron_asc[neuron], label="mean")
-    ax.set_title("%s ASC" % neuron)
-    ax.set_xlim(min(current_Nas), max(current_Nas))
-    ax.set_ylabel(y_label)
-    ax.set_xlabel("I (nA)")
-    ax.legend()
+    ax = fig_axes[neuron][0]
+    if ax is not None:
+      ax.plot(current_Nas, minVs_per_neuron_asc[neuron], label="min")
+      ax.plot(current_Nas, maxVs_per_neuron_asc[neuron], label="max")
+      ax.plot(current_Nas, meanVs_per_neuron_asc[neuron], label="mean")
+      ax.set_title("%s ASC" % neuron)
+      ax.set_xlim(min(current_Nas), max(current_Nas))
+      ax.set_ylabel(y_label)
+      ax.set_xlabel("I (nA)")
+      ax.legend()
+      
+    ax = fig_axes[neuron][1]
+    if ax is not None:
+      ax.plot(current_Nas, minVs_per_neuron_desc[neuron], label="min")
+      ax.plot(current_Nas, maxVs_per_neuron_desc[neuron], label="max")
+      ax.plot(current_Nas, meanVs_per_neuron_desc[neuron], label="mean")
+      ax.set_title("%s DESC" % neuron)
+      ax.set_xlim(min(current_Nas), max(current_Nas))
+      ax.set_ylabel(y_label)
+      ax.set_xlabel("I (nA)")
+      ax.legend()
     
-    fig, ax = plt.subplots(nrows=1, ncols=1)
-    ax.plot(current_Nas, minVs_per_neuron_desc[neuron], label="min")
-    ax.plot(current_Nas, maxVs_per_neuron_desc[neuron], label="max")
-    ax.plot(current_Nas, meanVs_per_neuron_desc[neuron], label="mean")
-    ax.set_title("%s DESC" % neuron)
-    ax.set_xlim(min(current_Nas), max(current_Nas))
-    ax.set_ylabel(y_label)
-    ax.set_xlabel("I (nA)")
-    ax.legend()
+    ax = fig_axes[neuron][2]
+    if ax is not None:
+      ax.plot(current_Nas, meanVs_per_neuron_asc[neuron], label="asc mean")
+      ax.plot(current_Nas, meanVs_per_neuron_desc[neuron], label="desc mean")
+      ax.set_title("%s Means of asc and desc" % neuron)
+      ax.set_xlim(min(current_Nas), max(current_Nas))
+      ax.set_ylabel(y_label)
+      ax.set_xlabel("I (nA)")
+      ax.legend()
     
-    fig, ax = plt.subplots(nrows=1, ncols=1)
-    ax.plot(current_Nas, meanVs_per_neuron_asc[neuron], label="asc mean")
-    ax.plot(current_Nas, meanVs_per_neuron_desc[neuron], label="desc mean")
-    ax.set_title("%s Means of asc and desc" % neuron)
-    ax.set_xlim(min(current_Nas), max(current_Nas))
-    ax.set_ylabel(y_label)
-    ax.set_xlabel("I (nA)")
-    ax.legend()
-    
-    fig, ax = plt.subplots(nrows=1, ncols=1)
-    asc_diams = np.array(maxVs_per_neuron_asc[neuron]) - np.array(minVs_per_neuron_asc[neuron])
-    # Desc has one entry less than asc, need to remove the last index, which contains None
-    desc_diams = np.array(maxVs_per_neuron_desc[neuron][:-1]) - np.array(minVs_per_neuron_desc[neuron][:-1])
-    ax.plot(current_Nas, asc_diams, label="asc diam")
-    ax.plot(current_Nas[:-1], desc_diams, label="desc diam")
-    ax.set_title("%s Diameter of asc and desc" % neuron)
-    ax.set_xlim(min(current_Nas), max(current_Nas))
-    ax.set_ylabel(y_label)
-    ax.set_xlabel("I (nA)")
-    ax.legend()
+    ax = fig_axes[neuron][3]
+    if ax is not None:
+      asc_diams = np.array(maxVs_per_neuron_asc[neuron]) - np.array(minVs_per_neuron_asc[neuron])
+      # Desc has one entry less than asc, need to remove the last index, which contains None
+      desc_diams = np.array(maxVs_per_neuron_desc[neuron][:-1]) - np.array(minVs_per_neuron_desc[neuron][:-1])
+      ax.plot(current_Nas, asc_diams, label="asc diam")
+      ax.plot(current_Nas[:-1], desc_diams, label="desc diam")
+      ax.set_title("%s Diameter of asc and desc" % neuron)
+      ax.set_xlim(min(current_Nas), max(current_Nas))
+      ax.set_ylabel(y_label)
+      ax.set_xlabel("I (nA)")
+      ax.legend()
 
 def get_v_y_axis_label(is_normalized_v):
   if is_normalized_v:
