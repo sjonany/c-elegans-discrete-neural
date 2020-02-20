@@ -20,12 +20,15 @@ neurons_to_observe = [key_neuron]
 
 amp_delta_nAs = [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1]
 cases = [
-  *[(0, 3, amp_delta_nA) for amp_delta_nA in amp_delta_nAs],
-  *[(3, 3, amp_delta_nA) for amp_delta_nA in amp_delta_nAs],
-  *[(5, 3, amp_delta_nA) for amp_delta_nA in amp_delta_nAs],
-  *[(0, 6, amp_delta_nA) for amp_delta_nA in amp_delta_nAs],
-  *[(1, 6, amp_delta_nA) for amp_delta_nA in amp_delta_nAs],
-  *[(3, 6, amp_delta_nA) for amp_delta_nA in amp_delta_nAs]
+  #*[(0, 3, amp_delta_nA) for amp_delta_nA in amp_delta_nAs],
+  #*[(3, 3, amp_delta_nA) for amp_delta_nA in amp_delta_nAs],
+  #*[(5, 3, amp_delta_nA) for amp_delta_nA in amp_delta_nAs],
+  #*[(0, 6, amp_delta_nA) for amp_delta_nA in amp_delta_nAs],
+  #*[(1, 6, amp_delta_nA) for amp_delta_nA in amp_delta_nAs],
+  #*[(3, 6, amp_delta_nA) for amp_delta_nA in amp_delta_nAs],
+  *[(0, 9, amp_delta_nA) for amp_delta_nA in amp_delta_nAs],
+  *[(1, 9, amp_delta_nA) for amp_delta_nA in amp_delta_nAs],
+  *[(2, 9, amp_delta_nA) for amp_delta_nA in amp_delta_nAs]
 ]
 
 
@@ -74,7 +77,7 @@ def gen_plot_for_one_init_cond(init_cond_seed, start_amp_nA, amp_delta_nA):
 
   plot_potentials(
     neuron_names_to_show = neurons_to_observe,
-    dynamics = v_mat,
+    dynamics = v_normalized_mat,
     is_normalized_v = True,
     dt = model.dt,
     neuron_metadata_collection = neuron_metadata_collection,
@@ -82,7 +85,7 @@ def gen_plot_for_one_init_cond(init_cond_seed, start_amp_nA, amp_delta_nA):
 
   create_changing_step_bifurcation_plot(
       neurons_to_observe = neurons_to_observe,
-      dynamics = v_normalized_mat,
+      dynamics = v_mat,
       is_normalized_v = False,
       step_amps_nA = step_amplitudes_nA,
       start_amp_nA = start_amp_nA,
