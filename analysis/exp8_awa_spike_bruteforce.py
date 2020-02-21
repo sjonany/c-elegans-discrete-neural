@@ -40,7 +40,7 @@ neurons_to_stimulate = [key_neuron]
 def gen_plot_for_one_init_cond(init_cond_seed, start_amp_nA, amp_delta_nA):
   model = NeuralModel(neuron_metadata_collection)
   peak_amp_nA = start_amp_nA + amp_delta_nA * num_step_increase
-  step_amplitudes_nA = np.concatenate((np.arange(start_amp_nA, peak_amp_nA, amp_delta_nA), \
+  step_amplitudes_nA = np.concatenate((np.arange(start_amp_nA, peak_amp_nA-amp_delta_nA/2, amp_delta_nA), \
       np.arange(peak_amp_nA, start_amp_nA-amp_delta_nA/2, -amp_delta_nA)), axis=None)
   initial_conds = init_conds.generate_init_cond_with_seed(
       model, key_neuron, start_amp_nA, init_cond_seed)
