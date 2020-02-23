@@ -131,10 +131,6 @@ def create_changing_step_bifurcation_plot(
 
   # Plot the summary statistics per neuron
   for neuron in neurons_to_observe:
-    minVs_per_neuron_asc[neuron]
-    maxVs_per_neuron_asc[neuron]
-    meanVs_per_neuron_asc[neuron]
-    
     ax = fig_axes[neuron][0]
     if ax is not None:
       ax.plot(current_Nas, minVs_per_neuron_asc[neuron], label="min")

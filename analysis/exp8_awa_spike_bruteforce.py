@@ -11,14 +11,16 @@ from util.plot_util import *
 Parameters
 """
 # How many seconds to run each step for. This should be long enough for stability to be observed.
-step_duration_s = 2
-num_step_increase = 10
+step_duration_s = 4.5
+num_step_increase = 3
 key_neuron = "AWAR"
 neurons_to_stimulate = [key_neuron]
 neurons_to_observe = [key_neuron]
 # init_cond_seed, start_amp_nA, amp_delta_nA
 
-amp_delta_nAs = [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1]
+#amp_delta_nAs = [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1]
+amp_delta_nAs = list(0.002 * np.array(list(range(1,10))))
+print(amp_delta_nAs)
 cases = [
   #*[(0, 3, amp_delta_nA) for amp_delta_nA in amp_delta_nAs],
   #*[(3, 3, amp_delta_nA) for amp_delta_nA in amp_delta_nAs],
@@ -26,9 +28,10 @@ cases = [
   #*[(0, 6, amp_delta_nA) for amp_delta_nA in amp_delta_nAs],
   #*[(1, 6, amp_delta_nA) for amp_delta_nA in amp_delta_nAs],
   #*[(3, 6, amp_delta_nA) for amp_delta_nA in amp_delta_nAs],
-  *[(0, 9, amp_delta_nA) for amp_delta_nA in amp_delta_nAs],
-  *[(1, 9, amp_delta_nA) for amp_delta_nA in amp_delta_nAs],
-  *[(2, 9, amp_delta_nA) for amp_delta_nA in amp_delta_nAs]
+  #*[(0, 9, amp_delta_nA) for amp_delta_nA in amp_delta_nAs],
+  #*[(1, 9, amp_delta_nA) for amp_delta_nA in amp_delta_nAs],
+  #*[(2, 9, amp_delta_nA) for amp_delta_nA in amp_delta_nAs]
+  *[(11, 6.7, amp_delta_nA) for amp_delta_nA in amp_delta_nAs]
 ]
 
 
@@ -40,8 +43,7 @@ neurons_to_stimulate = [key_neuron]
 def gen_plot_for_one_init_cond(init_cond_seed, start_amp_nA, amp_delta_nA):
   model = NeuralModel(neuron_metadata_collection)
   peak_amp_nA = start_amp_nA + amp_delta_nA * num_step_increase
-  step_amplitudes_nA = np.concatenate((np.arange(start_amp_nA, peak_amp_nA-amp_delta_nA/2, amp_delta_nA), \
-      np.arange(peak_amp_nA, start_amp_nA-amp_delta_nA/2, -amp_delta_nA)), axis=None)
+  step_amplitudes_nA = np.arange(start_amp_nA, peak_amp_nA-amp_delta_nA/2, amp_delta_nA)
   initial_conds = init_conds.generate_init_cond_with_seed(
       model, key_neuron, start_amp_nA, init_cond_seed)
   step_duration_timesteps = int(step_duration_s / model.dt)
