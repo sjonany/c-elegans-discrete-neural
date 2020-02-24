@@ -1,3 +1,7 @@
+"""
+See writeup. https://docs.google.com/document/d/1St4qOVr0Bv-Kyh0PwRG6zc75VT38Pm8z5JhOql96W8A/edit#
+"""
+
 import numpy as np
 import pylab as plt
 import project_path

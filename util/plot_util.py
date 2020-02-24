@@ -25,7 +25,7 @@ def plot_potentials(neuron_names_to_show, dynamics, is_normalized_v, dt, neuron_
   """
   dynamics_snapshot_count = dynamics.shape[0]
   num_neurons_to_show = len(neuron_names_to_show)
-  times = np.arange(0, dynamics_snapshot_count * dt, dt)
+  times = np.arange(0, dynamics_snapshot_count * dt - dt / 2.0, dt)
   for i in range(num_neurons_to_show):
     name = neuron_names_to_show[i]
     id = neuron_metadata_collection.get_id_from_name(name)
