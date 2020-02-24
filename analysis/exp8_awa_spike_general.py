@@ -55,10 +55,10 @@ def build_case_from_setup(setup_name, setup_stim_spec, step_duration_s, incremen
   return build_case(case_name, init_cond_seed, init_cond_amp_nA, stim_spec)
 
 def build_case_from_setup1(step_duration_s, increment_nA):
-  return build_case_from_setup("setup1", [(6.7, 2), (6.718, 2)], step_duration_s, increment_nA)
+  return build_case_from_setup("setup2s", [(6.7, 2), (6.718, 2)], step_duration_s, increment_nA)
 
 def build_case_from_setup2(step_duration_s, increment_nA):
-  return build_case_from_setup("setup2", [(6.7, 4)], step_duration_s, increment_nA)
+  return build_case_from_setup("setup4s", [(6.7, 4.5)], step_duration_s, increment_nA)
 
 cases = []
 for increment_nA in [0.001, 0.002, 0.004, 0.008, 0.016]:
