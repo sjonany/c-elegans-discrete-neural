@@ -181,8 +181,7 @@ class NeuralModel:
     """
     The equilibrium values for all si's are the same, no matter I_ext. Just set phi = 0.5.
     """
-    # Interactome rounded to 4, so we followed suit.
-    return round(self.ar / (self.ar + 2 * self.ad), 4)
+    return self.ar / (self.ar + 2 * self.ad)
 
   def compute_standard_equilibrium(self):
     """
