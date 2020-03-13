@@ -44,7 +44,7 @@ def build_case_from_setup(setup_name, setup_stim_spec, step_duration_s, incremen
   See this section for why these specific setups.
   https://docs.google.com/document/d/1St4qOVr0Bv-Kyh0PwRG6zc75VT38Pm8z5JhOql96W8A/edit#heading=h.ud0sn8353b9h
   """
-  case_name = "%s_%.2fs_%.2fnA" % (setup_name, step_duration_s, increment_nA)
+  case_name = "%s_%.2fs_%.3fnA" % (setup_name, step_duration_s, increment_nA)
   init_cond_seed = 11
   init_cond_amp_nA = 6.7
   num_step = 3
@@ -61,8 +61,8 @@ def build_case_from_setup2(step_duration_s, increment_nA):
   return build_case_from_setup("setup4s", [(6.7, 4.5)], step_duration_s, increment_nA)
 
 cases = []
-for increment_nA in [0.001, 0.002, 0.004, 0.008, 0.016]:
-  for step_duration_s in [0.2, 0.5, 1, 1.5, 2]:
+for increment_nA in [0.032, 0.064, 0.128, 0.500, 1.0, 2.0]:#[0.001, 0.002, 0.004, 0.008, 0.016]:
+  for step_duration_s in [0.5, 1, 1.5, 2]:
     cases.append(build_case_from_setup1(step_duration_s, increment_nA))
     cases.append(build_case_from_setup2(step_duration_s, increment_nA))
 
@@ -78,6 +78,7 @@ def run_one_case(case_name, init_cond_seed, init_cond_amp_nA, stim_spec):
   step_timechanges_s = np.concatenate(([0], (np.cumsum(step_durations_s)[:-1])))
 
   model = NeuralModel(neuron_metadata_collection)
+  model.dt = 0.001
   initial_conds = init_conds.generate_init_cond_with_seed(
       model, key_neuron, init_cond_amp_nA, init_cond_seed)
   model.init_conds = initial_conds

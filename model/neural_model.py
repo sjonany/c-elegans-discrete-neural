@@ -155,8 +155,7 @@ class NeuralModel:
     - L2 norm of compute_Vth() and interactome's:  3.907985046680551e-14
     """
     b1 = -np.tile(self.Gc * self.Ec, self.N)
-    # Interactome rounded to 4, so we followed suit.
-    s_eq = round(self.ar / (self.ar + 2 * self.ad), 4)
+    s_eq = self.compute_s_eq()
     b3 = -s_eq * (self.Gs @ self.E)
 
     m1 = -self.Gc * np.identity(self.N)
@@ -178,6 +177,22 @@ class NeuralModel:
     self.A = A
     self.Vth = np.reshape(linalg.solve(A, b), self.N)
   
+  def compute_s_eq(self):
+    """
+    The equilibrium values for all si's are the same, no matter I_ext. Just set phi = 0.5.
+    """
+    # Interactome rounded to 4, so we followed suit.
+    return round(self.ar / (self.ar + 2 * self.ad), 4)
+
+  def compute_standard_equilibrium(self):
+    """
+    Compute the standard equilibrium, where for a given I_ext, if you start close to here,
+    you will stay here forever (assuming this is a stable fixed point -- but sometimes it's not)
+    Useful for analysis, but not for model running.
+    """
+    self.compute_Vth()
+    s_eq = self.compute_s_eq()
+    return np.append(self.Vth, np.array([s_eq] * self.N))
 
   def update_cur_I_ext_and_Vth(self, t):
     if len(self.t_changes_I_ext) > 0 and t >= self.t_changes_I_ext[0]:
@@ -249,7 +264,7 @@ class NeuralModel:
     dyn = integrate.ode(self.dynamic).set_integrator('vode', atol = 1e-3,
         min_step = dt*1e-6, method = 'bdf', with_jacobian = True,
         max_step = dt)
-    dyn.set_initial_value(self.init_conds, 0)
+    dyn.set_initial_value(self.init_conds , 0)
 
     start_time = time.time()
     for t in range(num_timesteps):
