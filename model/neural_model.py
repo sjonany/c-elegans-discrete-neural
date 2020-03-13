@@ -223,7 +223,7 @@ class NeuralModel:
     I_syn = v_arr * (self.Gs @ s_arr) - self.Gs @ (s_arr * self.E)
 
     dV = (-I_leak - I_gap - I_syn + self.cur_I_ext) / self.C
-    phi = np.reciprocal(1.0 + np.exp(-self.B*(v_arr - self.Vth)))
+    phi = 1.0/(1.0 + np.exp(-self.B*(v_arr - self.Vth)))
     syn_rise = self.ar * phi * (1 - s_arr)
                           
     syn_drop = self.ad * s_arr
