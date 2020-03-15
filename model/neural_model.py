@@ -69,6 +69,11 @@ class NeuralModel:
     # Width of the sigmoid (mv^-1)
     self.B = 0.125
 
+    # If set to False, this is the same as the original Kunert 2014 model, where
+    # Vth gets recalculated based on I_ext.
+    # If true, then Vth will always be based off I_ext = 0
+    self.keep_vth_static = False
+
   def set_I_ext(self, time_to_I_ext_fun, t_changes_I_ext):
     """
     Set the injected currents, which can vary over time.
@@ -171,9 +176,10 @@ class NeuralModel:
     m4 = self.Gg
 
     A = m1 + m2 + m3 + m4
-    # TODO: Create a mode where you don't use moving Vth.
     # b = b1 + b3
-    b = b1 + b3 - self.cur_I_ext
+    b = b1 + b3 
+    if not self.keep_vth_static:
+        b = b - self.cur_I_ext
     self.A = A
     self.Vth = np.reshape(linalg.solve(A, b), self.N)
   
