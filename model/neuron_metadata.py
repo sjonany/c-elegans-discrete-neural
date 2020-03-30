@@ -31,7 +31,10 @@ class NeuronMetadataCollection:
     return self.id_to_metadata[id]
 
   def get_id_from_name(self, name):
-    return self.name_to_id[name]
+    """
+    Get the canonical neuron integer id, or -1 if not found.
+    """
+    return self.name_to_id.get(name, -1)
 
   def get_size(self):
     return len(self.id_to_metadata)
