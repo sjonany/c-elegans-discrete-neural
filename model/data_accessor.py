@@ -1,5 +1,5 @@
 """
-utility methods for getting absolute paths to various files in root's data/ folder.
+Utility methods for getting absolute paths to various files in root's data/ folder.
 """
 
 import os
