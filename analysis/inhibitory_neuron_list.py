@@ -2,6 +2,7 @@
 List of inhibitory neurons.
 """
 import numpy as np
+# noinspection PyUnresolvedReferences
 import project_path  # pylint: disable=unused-import
 
 from model.data_accessor import get_data_file_abs_path

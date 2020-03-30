@@ -13,3 +13,7 @@
 ### emask.npy
 * **Usage**. Whether or not neuron in excitatory or inhibitory. An N-element array of 0-1's. 1 if inhibitory.
 * **Source**. From https://github.com/shlizee/C-elegans-Neural-Interactome/blob/master/emask.npy 
+
+### herm_full_edgelist.csv
+* **Usage**. Cook et al., 2019's connectome, meant to be an update over Varshney et al., 2011.
+* **Source**. https://wormwiring.org/series/ > Combined Anterior + Posterior (N2U + JSE) > Edge list.
