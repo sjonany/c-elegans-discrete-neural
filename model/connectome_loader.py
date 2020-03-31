@@ -8,7 +8,7 @@ from model.data_accessor import get_data_file_abs_path
 from model.neuron_metadata import NeuronMetadataCollection
 
 
-def load_gap_connectome_varshney():
+def load_connectome_varshney():
     """
     Get gap junction and chemical synapse connectivity matrix from Varshney et al., 2011.
     The returned value is a tuple of (gap junction matrix, chem matrix)

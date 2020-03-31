@@ -4,6 +4,7 @@ import pdb
 import time
 from .neuron_metadata import *
 from .data_accessor import *
+from .connectome_loader import load_connectome_cook, load_connectome_varshney
 
 class NeuralModel:
   """ The C elegans model as described in the paper: "Neural Interactome: Interactive Simulation of a Neuronal System"
@@ -113,11 +114,14 @@ class NeuralModel:
     """
     # Gap junctions. Total conductivity of gap junctions, where total conductivity = #junctions * ggap.
     # An N x N matrix were Gg[i][j] = from neuron j to i.
-    self.Gg = np.load(get_data_file_abs_path('Gg.npy')) * self.ggap
+    
+    unscaled_Gg, unscaled_Gs = load_connectome_varshney()
+
+    self.Gg = unscaled_Gg * self.ggap
 
     # Synaptic junctions. Total conductivity of synapses, where total conductivity = #junctions * gsyn.
     # An N x N matrix were Gs[i][j] = from neuron j to i.
-    self.Gs = np.load(get_data_file_abs_path('Gs.npy')) * self.gsyn
+    self.Gs = unscaled_Gs * self.gsyn
 
     # E. Reversal potential for each neuron, for calculating I_syn
     # 0 mV for synapses going from an excitatory neuron, -48 mV for inhibitory.
@@ -125,7 +129,7 @@ class NeuralModel:
     is_inhibitory = np.load(get_data_file_abs_path('emask.npy'))
     self.E = np.reshape(-48.0 * is_inhibitory, self.N)
 
-  def init_kunert_2017(self):
+  def init_kunert_2017(self, connectome_load_fcn=load_connectome_varshney):
     """
     Change parameters to Kunert et al., 2017: "Multistability ..."
     See section 2.2 model parameters.
@@ -138,8 +142,10 @@ class NeuralModel:
     self.Gc = 0.1
     self.Ec = -35.0
     self.C = 0.01
-    self.Gg = np.load(get_data_file_abs_path('Gg.npy')) * self.ggap
-    self.Gs = np.load(get_data_file_abs_path('Gs.npy')) * self.gsyn
+
+    unscaled_Gg, unscaled_Gs = connectome_load_fcn()
+    self.Gg = unscaled_Gg * self.ggap
+    self.Gs = unscaled_Gs * self.gsyn
 
     # ar and ad are given in Kunert et al., 2014, which strangely enough has different
     # values for the previous params, and more in line with Kim et al., 2019's.
@@ -148,6 +154,8 @@ class NeuralModel:
     is_inhibitory = np.load(get_data_file_abs_path('emask.npy'))
     self.E = np.reshape(-45.0 * is_inhibitory, self.N)
 
+  def init_kunert_2017_cook_connectome(self):
+    self.init_kunert_2017(load_connectome_cook)
 
   def compute_Vth(self):
     """
